@@ -14,44 +14,23 @@
 
 #include <chrono>
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
+#include "sensor_msgs/msg/image.hpp"
 
 using namespace std::chrono_literals;
 
 /* This example creates a subclass of Node and uses std::bind() to register a
  * member function as a callback from the timer. */
 
-class MyTestNode : public rclcpp::Node
+class MyTestSub : public rclcpp::Node
 {
 public:
-  MyTestNode()
-  : Node("my_test"), count_(0)
-  {
-    rmw_qos_profile_t sub_qos_profile = rmw_qos_profile_default;
-
-    sub_qos_profile.history=RMW_QOS_POLICY_HISTORY_KEEP_LAST;
-    sub_qos_profile.depth = 300;
-    sub_qos_profile.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
-
-    subscription_ = this->create_subscription<std_msgs::msg::String>(
-      "topic", std::bind(&MyTestNode::topic_callback, this, std::placeholders::_1),sub_qos_profile);
-  }
+  MyTestSub();
 
 private:
-  void topic_callback(const std_msgs::msg::String::SharedPtr msg)
-  {
-    RCLCPP_INFO(this->get_logger(), "I heard: '%s'", msg->data.c_str())
-  }
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;  
+  void topic_callback(const sensor_msgs::msg::Image::UniquePtr msg);
+
+  rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr subscription_;  
   rclcpp::TimerBase::SharedPtr timer_;
   size_t count_;
 };
 
-
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<MyTestNode>());
-  rclcpp::shutdown();
-  return 0;
-}

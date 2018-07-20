@@ -22,6 +22,6 @@ from launch_ros.actions import Node
 def generate_launch_description():
 
     return LaunchDescription([
-        Node(package='basic_test', node_executable='pub', output='screen'),
-        Node(package='basic_test', node_executable='sub', output='screen')
+        Node(package='basic_test', node_executable='stand_pub', output='screen'),
+        Node(package='basic_test', node_executable='stand_sub', output='screen')
     ])

@@ -19,17 +19,32 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(OpenCV REQUIRED)
 
-add_executable(test0 src/test.cpp)
-ament_target_dependencies(test0 rclcpp std_msgs)
-
-add_executable(sub src/sub.cpp)
-ament_target_dependencies(sub rclcpp std_msgs)
+include_directories(component)
 
 
-add_executable(pub src/pub.cpp)
-ament_target_dependencies(pub rclcpp std_msgs)
 
+add_library(comp_sub component/sub.cpp)
+ament_target_dependencies(comp_sub rclcpp std_msgs sensor_msgs OpenCV)
+
+
+add_library(comp_pub component/pub.cpp)
+ament_target_dependencies(comp_pub rclcpp std_msgs sensor_msgs OpenCV)
+
+
+add_executable(composition src/composition.cpp)
+ament_target_dependencies(composition rclcpp std_msgs sensor_msgs)
+target_link_libraries(composition comp_sub comp_pub)
+
+add_executable(standalone_pub src/standalone_pub.cpp)
+ament_target_dependencies(standalone_pub rclcpp std_msgs sensor_msgs)
+target_link_libraries(standalone_pub comp_pub)
+
+add_executable(standalone_sub src/standalone_sub.cpp)
+ament_target_dependencies(standalone_sub rclcpp std_msgs sensor_msgs)
+target_link_libraries(standalone_sub comp_sub)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -43,9 +58,11 @@ if(BUILD_TESTING)
 endif()
 
 install(TARGETS
-  test0
-  sub 
-  pub
+  composition
+  comp_sub
+  comp_pub
+  standalone_pub
+  standalone_sub
   DESTINATION lib/${PROJECT_NAME}
 )
 
